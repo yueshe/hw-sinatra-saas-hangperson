@@ -42,12 +42,12 @@ class HangpersonGame
     end
     k = i.downcase
     if (@guess_arr.has_key?(k) == false) 
-      @lives = @lives - 1
-      if (@lives <= 0)
-        @check_win_or_lose = :lose
-        return true
-      end
       if (@wrong_guess_arr.has_key?(k) == false)
+        @lives = @lives - 1
+        if (@lives <= 0)
+          @check_win_or_lose = :lose
+          return true
+        end
         @wrong_guess_arr[k] = 1
         @wrong_guesses = @wrong_guesses + k 
         return true

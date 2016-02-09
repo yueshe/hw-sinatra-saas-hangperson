@@ -31,6 +31,9 @@ class HangpersonApp < Sinatra::Base
     # NOTE: don't change previous line - it's needed by autograder!
 
     @game = HangpersonGame.new(word)
+    session[:word] = @game.word
+    session[:guesses] = @game.guesses
+    session[:wrong_guesses] = @game.wrong_guesses
     redirect '/show'
   end
   
@@ -38,9 +41,26 @@ class HangpersonApp < Sinatra::Base
   # If a guess is repeated, set flash[:message] to "You have already used that letter."
   # If a guess is invalid, set flash[:message] to "Invalid guess."
   post '/guess' do
-    letter = params[:guess].to_s[0]
-    ### YOUR CODE HERE ###
-    redirect '/show'
+    if params[:guess].length == 0
+      flash[:message] = 'Invalid guess'
+      redirect '/show'
+    else 
+      letter = params[:guess].to_s[0]
+      if @game.guesses.include?letter
+        flash[:message] = "You have already used that letter."
+      end
+      if @game.wrong_guesses.include?letter
+        flash[:message] = "You have already used that letter."
+      end
+      begin
+        @game.guess(letter)
+      rescue
+        flash[:message] = "Invalid guess."
+      end
+      session[:guesses] = @game.guesses
+      session[:wrong_guesses] = @game.wrong_guesses
+      redirect '/show'
+    end
   end
   
   # Everytime a guess is made, we should eventually end up at this route.
@@ -50,16 +70,27 @@ class HangpersonApp < Sinatra::Base
   # wrong_guesses and word_with_guesses from @game.
   get '/show' do
     ### YOUR CODE HERE ###
+    if (@game.check_win_or_lose == :win) 
+      redirect '/win'
+    elsif (@game.check_win_or_lose == :lose) 
+      redirect '/lose'
+    end
     erb :show # You may change/remove this line
   end
   
   get '/win' do
     ### YOUR CODE HERE ###
+    if (@game.check_win_or_lose != :win)
+      redirect '/show'
+    end
     erb :win # You may change/remove this line
   end
   
   get '/lose' do
     ### YOUR CODE HERE ###
+    if (@game.check_win_or_lose != :lose)
+      redirect '/show'
+    end
     erb :lose # You may change/remove this line
   end
   
